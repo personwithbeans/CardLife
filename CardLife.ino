@@ -3,6 +3,7 @@
 // https://en.wikipedia.org/wiki/Conway's_Game_of_Life
 
 #include "M5Cardputer.h"
+#include "Logo.c"
 
 //ULTLORES
 //        #define GRIDX 30
