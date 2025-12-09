@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quantum Life Sphere - Scientific Simulator</title>
+    <style>
+        /* Set up a dark, high-tech background for the entire page */
+        body {
+            background-color: #1a1a1a; /* Dark gray background */
+            color: #e0e0e0; /* Light text color for contrast */
+            font-family: 'Courier New', monospace; /* Monospaced font for a terminal-like feel */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            min-height: 100vh; /* Ensure body fills viewport height */
+        }
+        /* Style the main simulation container with a scientific aesthetic */
+        #simulation {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center contents horizontally */
+            padding: 2vh; /* Scale padding with viewport height */
+            border: 2px solid; /* Set border thickness */
+            border-image: linear-gradient(to right, #004d00, #00cc00) 1; /* Green gradient frame */
+            background: linear-gradient(135deg, #2e2e2e, #1f1f1f); /* Metallic gradient */
+            margin: 2vh; /* Scale margin with viewport height */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 0 15px rgba(0, 204, 0, 0.3); /* Green glow effect for depth */
+            width: 96vw; /* Nearly full viewport width */
+            height: 80vh; /* Most of viewport height, leaving room for footer */
+            box-sizing: border-box; /* Include padding and border in dimensions */
+        }
+        /* Style the title for a clean, scientific look */
+        h2 {
+            text-transform: uppercase; /* All caps for emphasis */
+            letter-spacing: 2px; /* Spacing for a modern feel */
+            margin-bottom: 1.5vh; /* Scale with viewport */
+        }
+        /* Container for control buttons and sliders with a metallic look */
+        .controls {
+            display: flex;
+            flex-wrap: wrap; /* Allow items to wrap on small screens */
+            justify-content: center;
+            align-items: center; /* Vertically center controls */
+            background: linear-gradient(#3a3a3a, #2a2a2a); /* Darker metallic gradient */
+            padding: 1vh; /* Scale padding */
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px #000; /* Inset shadow for a pressed look */
+        }
+        /* Style buttons to resemble lab equipment controls */
+        button {
+            margin: 0.5vh; /* Scale margin */
+            padding: 0.8vh 1.5vh; /* Scale padding */
+            cursor: pointer;
+            background: linear-gradient(#4a4a4a, #3a3a3a); /* Button gradient */
+            color: #e0e0e0;
+            border: 1px solid #555; /* Subtle border */
+            border-radius: 4px;
+            text-transform: uppercase; /* Consistent with scientific theme */
+            font-size: 1.2vh; /* Scale font size */
+            transition: background 0.2s; /* Smooth hover effect */
+        }
+        button:hover {
+            background: linear-gradient(#5a5a5a, #4a4a4a); /* Lighter gradient on hover */
+        }
+        /* Style sliders and labels */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin: 0.5vh;
+        }
+        label {
+            margin-right: 0.5vh;
+            font-size: 1.2vh; /* Scale font size */
+            text-transform: uppercase;
+        }
+        input[type="range"] {
+            width: 10vw; /* Scale width with viewport */
+            -webkit-appearance: none; /* Remove default styling */
+            background: linear-gradient(#4a4a4a, #3a3a3a); /* Match button gradient */
+            height: 0.8vh; /* Scale height */
+            border-radius: 4px;
+            border: 1px solid #555;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 1.5vh;
+            height: 1.5vh;
+            background: #00cc00; /* Bright green thumb */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 1.5vh;
+            height: 1.5vh;
+            background: #00cc00; /* Bright green thumb */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        /* Define the canvas size to fill available space */
+        #canvas {
+            width: 100%; /* Fill container width */
+            height: 90%; /* Leave room for title and controls */
+            border: 1px solid #444; /* Thin border for definition */
+            border-radius: 4px;
+        }
+        /* Style the footer for the fluctuation meter and data */
+        footer {
+            text-align: center;
+            padding: 2vh; /* Scale padding */
+            background: linear-gradient(#2e2e2e, #1f1f1f); /* Match simulation background */
+            border-top: 2px solid; /* Set border thickness */
+            border-image: linear-gradient(to right, #004d00, #00cc00) 1; /* Green gradient top border */
+        }
+        /* Size the SVG fluctuation meter */
+        #fluctuation-meter {
+            width: 20vw; /* Scale with viewport width */
+            height: 5vh; /* Scale with viewport height */
+            margin: 1vh auto; /* Center in footer */
+        }
+        /* Style the data panel for numerical readouts */
+        #data-panel {
+            margin-top: 1vh; /* Scale margin */
+            font-size: 1.4vh; /* Scale font size */
+            color: #0f0; /* Green text for a digital display feel */
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for the simulation -->
+    <div id="simulation">
+        <h2>Quantum Life Sphere</h2>
+        <!-- Control panel with interactive buttons and sliders -->
+        <div class="controls">
+            <button onclick="step()">Step</button>
+            <button onclick="toggleRun()" id="runBtn">Start</button>
+            <button onclick="reset()">Reset</button>
+            <button onclick="randomize()">Randomize</button>
+            <button onclick="toggleFullscreen()" id="fullscreenBtn">Fullscreen</button>
+            <div class="slider-container">
+                <label for="speedSlider">Speed</label>
+                <input type="range" id="speedSlider" min="0" max="0.02" step="0.001" value="0.005">
+            </div>
+            <div class="slider-container">
+                <label for="zoomSlider">Zoom</label>
+                <input type="range" id="zoomSlider" min="400" max="800" step="1" value="600">
+            </div>
+            <div class="slider-container">
+                <label for="colorSlider">Color</label>
+                <input type="range" id="colorSlider" min="0" max="255" step="1" value="128">
+            </div>
+        </div>
+        <!-- Canvas for rendering the 3D sphere -->
+        <canvas id="canvas"></canvas>
+    </div>
+    <!-- Footer with fluctuation meter and data display -->
+    <footer>
+        <h3>Quantum Fluctuation Monitor</h3>
+        <!-- SVG-based VU meter for visualizing fluctuations -->
+        <svg id="fluctuation-meter">
+            <rect x="0" y="0" width="100%" height="100%" fill="#333" stroke="#fff" stroke-width="2"/>
+            <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#fff" stroke-width="1"/> <!-- Center line -->
+            <line id="needle" x1="50%" y1="100%" x2="50%" y2="0" stroke="#f00" stroke-width="2"/> <!-- Needle -->
+        </svg>
+        <!-- Numerical data display -->
+        <div id="data-panel">
+            Fluctuation: <span id="fluctuation-value">0.000</span> | Avg. P(Alive): <span id="avg-palive">0.000</span>
+        </div>
+    </footer>
+
+    <!-- Load Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // --- Constants ---
+        const ROWS = 160; // Doubled grid size: Number of rows
+        const COLS = 160; // Doubled grid size: Number of columns
+        const DELTA = 0.1; // Rotation angle for quantum state updates (radians)
+        const RADIUS = 300; // Radius of the sphere for point positioning
+
+        // --- Global Variables ---
+        let grid = []; // 2D array storing quantum states (a, b) for each cell
+        let running = false; // Flag for continuous simulation
+        let fluctuation = 0; // Measure of state changes per step
+        let scene, camera, renderer, points, controls; // Three.js objects
+        let rotationSpeed = 0.005; // Default rotation speed (radians per frame)
+        let colorValue = 128; // Default color slider value (middle of range)
+        let positions = []; // Array for dot positions
+        let colors = []; // Array for dot colors
+
+        // --- Initialize Three.js Scene with Points ---
+        function initThree() {
+            scene = new THREE.Scene(); // Create a new 3D scene
+            camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000); // FOV=75, near=0.1, far=1000
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true }); // WebGL renderer
+            const simulationDiv = document.getElementById('simulation');
+            renderer.setSize(simulationDiv.clientWidth, simulationDiv.clientHeight); // Match container size
+            camera.aspect = simulationDiv.clientWidth / simulationDiv.clientHeight; // Set initial aspect ratio
+            camera.updateProjectionMatrix();
+
+            // Create geometry for points
+            const geometry = new THREE.BufferGeometry();
+            
+            // Map 160x160 grid to spherical coordinates
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const theta = (i / ROWS) * Math.PI; // Polar angle (0 to π)
+                    const phi = (j / COLS) * 2 * Math.PI; // Azimuthal angle (0 to 2π)
+                    const x = RADIUS * Math.sin(theta) * Math.cos(phi);
+                    const y = RADIUS * Math.cos(theta);
+                    const z = RADIUS * Math.sin(theta) * Math.sin(phi);
+                    positions.push(x, y, z);
+                    colors.push(0, 0, 0); // Initial colors (black)
+                }
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({ 
+                size: 6, // Increased dot size for visibility
+                vertexColors: true, // Use per-point colors
+                sizeAttenuation: true, // Dots scale with distance
+                depthTest: true // Ensure occlusion by respecting depth buffer
+            });
+            points = new THREE.Points(geometry, material); // Create points object
+            scene.add(points); // Add points to scene
+
+            // Add axes helper to debug scene orientation
+            const axesHelper = new THREE.AxesHelper(500); // Red=X, Green=Y, Blue=Z
+            scene.add(axesHelper);
+
+            camera.position.z = 600; // Default zoom-out distance
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement); // Enable mouse controls
+            controls.enableDamping = true; // Smooth camera motion
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.5;
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            console.log("Scene initialized, points position count:", positions.length / 3);
+            console.log("Camera position:", camera.position);
+            animate(); // Start animation loop
+        }
+
+        // --- Setup Sliders ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const speedSlider = document.getElementById('speedSlider');
+            speedSlider.addEventListener('input', () => {
+                rotationSpeed = parseFloat(speedSlider.value); // Update rotation speed
+                renderer.render(scene, camera); // Force render
+            });
+
+            const zoomSlider = document.getElementById('zoomSlider');
+            zoomSlider.addEventListener('input', () => {
+                camera.position.z = parseFloat(zoomSlider.value); // Update camera zoom
+                camera.updateProjectionMatrix(); // Update camera projection
+                renderer.render(scene, camera); // Force render
+            });
+
+            const colorSlider = document.getElementById('colorSlider');
+            colorSlider.addEventListener('input', () => {
+                colorValue = parseFloat(colorSlider.value); // Update color value
+                renderGrid(); // Re-render with new color spectrum
+            });
+        });
+
+        // --- Handle Window Resize ---
+        function onWindowResize() {
+            const simulationDiv = document.getElementById('simulation');
+            const width = simulationDiv.clientWidth;
+            const height = simulationDiv.clientHeight;
+            renderer.setSize(width, height); // Update renderer size
+            camera.aspect = width / height; // Update camera aspect ratio
+            camera.updateProjectionMatrix(); // Apply changes to camera
+            renderer.render(scene, camera); // Ensure immediate render
+        }
+
+        // --- Animation Loop with Y-Axis Spin ---
+        function animate() {
+            requestAnimationFrame(animate); // Continuously call animate
+            points.rotation.y += rotationSpeed; // Spin points on Y-axis, adjustable via slider
+            controls.update(); // Update camera controls
+            renderer.render(scene, camera); // Basic render
+        }
+
+        // --- Initialize Grid with Glider Pattern ---
+        function initializeGrid() {
+            grid = [];
+            for (let i = 0; i < ROWS; i++) {
+                let row = [];
+                for (let j = 0; j < COLS; j++) {
+                    let a, b;
+                    // Set initial glider pattern at specific coordinates, scaled for larger grid
+                    if ((i === 20 && j === 22) || (i === 22 && j === 24) || (i === 24 && j === 20) || 
+                        (i === 24 && j === 22) || (i === 24 && j === 24)) {
+                        [a, b] = [0, 1]; // Fully alive
+                    } else {
+                        [a, b] = [1, 0]; // Fully dead
+                    }
+                    row.push({ a, b });
+                }
+                grid.push(row);
+            }
+            renderGrid(); // Render initial state
+            updateFluctuationMeter(0, 0); // Reset meter
+        }
+
+        // --- Render Grid to Points with RGB Spectrum and Grayscale ---
+        function renderGrid() {
+            let totalPAlive = 0; // Track total probability for averaging
+            let rMax, gMax, bMax; // Maximum RGB values based on slider
+
+            // Map colorValue (0-255) to RGB spectrum and grayscale
+            if (colorValue < 64) { // Grayscale: Black to White
+                const gray = Math.floor((colorValue / 63) * 255);
+                rMax = gray;
+                gMax = gray;
+                bMax = gray;
+            } else if (colorValue < 128) { // Red to Green
+                const t = (colorValue - 64) / 63;
+                rMax = Math.floor(255 * (1 - t));
+                gMax = Math.floor(255 * t);
+                bMax = 0;
+            } else if (colorValue < 192) { // Green to Blue
+                const t = (colorValue - 128) / 63;
+                rMax = 0;
+                gMax = Math.floor(255 * (1 - t));
+                bMax = Math.floor(255 * t);
+            } else { // Blue to White
+                const t = (colorValue - 192) / 63;
+                rMax = Math.floor(255 * t);
+                gMax = Math.floor(255 * t);
+                bMax = Math.floor(255 * (1 - t) + 255);
+            }
+
+            const colorAttribute = points.geometry.getAttribute('color');
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const pAlive = grid[i][j].b * grid[i][j].b; // Probability of being alive
+                    totalPAlive += pAlive;
+                    const idx = (i * COLS + j) * 3; // Index in color array (3 components per point)
+                    // Interpolate from black (0,0,0) to selected color (rMax, gMax, bMax)
+                    const r = pAlive * rMax / 255; // Normalize to 0-1 for THREE.js
+                    const g = pAlive * gMax / 255;
+                    const b = pAlive * bMax / 255;
+                    colorAttribute.setXYZ(idx, r, g, b);
+                }
+            }
+            colorAttribute.needsUpdate = true; // Flag color attribute for update
+            renderer.render(scene, camera); // Render the scene
+            return totalPAlive / (ROWS * COLS); // Return average pAlive
+        }
+
+        // --- Compute Probability of k Alive Neighbors ---
+        function computePN(pList, k) {
+            const n = pList.length;
+            let dp = Array(n + 1).fill(0); // Dynamic programming array
+            dp[0] = 1; // Base case: probability of 0 neighbors
+            for (const p of pList) {
+                const newDp = Array(n + 1).fill(0);
+                newDp[0] = dp[0] * (1 - p); // Probability of no additional alive neighbors
+                for (let i = 1; i <= n; i++) {
+                    newDp[i] = dp[i - 1] * p + dp[i] * (1 - p); // Update probabilities
+                }
+                dp = newDp;
+            }
+            return dp[k]; // Return probability of exactly k alive neighbors
+        }
+
+        // --- Get Neighbors' Probabilities with Spherical Wrapping ---
+        function getNeighborsP(i, j) {
+            const neighbors = [
+                [(i-1+ROWS)%ROWS, (j-1+COLS)%COLS], [(i-1+ROWS)%ROWS, j], [(i-1+ROWS)%ROWS, (j+1)%COLS],
+                [i, (j-1+COLS)%COLS],                                [i, (j+1)%COLS],
+                [(i+1)%ROWS, (j-1+COLS)%COLS],       [(i+1)%ROWS, j], [(i+1)%ROWS, (j+1)%COLS]
+            ]; // 8 neighbors with wrap-around for spherical topology
+            const pList = [];
+            for (const [ni, nj] of neighbors) {
+                pList.push(grid[ni][nj].b * grid[ni][nj].b); // Add pAlive for each neighbor
+            }
+            return pList;
+        }
+
+        // --- Apply Quantum Y-Rotation to State ---
+        function applyRotation(state, theta) {
+            const cosHalf = Math.cos(theta / 2);
+            const sinHalf = Math.sin(theta / 2);
+            const aNew = state.a * cosHalf - state.b * sinHalf; // New a coefficient
+            const bNew = state.a * sinHalf + state.b * cosHalf; // New b coefficient
+            return { a: aNew, b: bNew }; // Updated quantum state
+        }
+
+        // --- Update Fluctuation Meter and Data Panel ---
+        function updateFluctuationMeter(fluctuation, avgPAlive) {
+            const needle = document.getElementById('needle');
+            const svg = document.getElementById('fluctuation-meter');
+            const width = svg.clientWidth;
+            const height = svg.clientHeight;
+            const angle = (fluctuation * 180 - 90) * (Math.PI / 180); // Convert to radians, -90° to 90°
+            const x2 = width / 2 + (height / 2) * Math.cos(angle); // Needle tip x-coordinate
+            const y2 = height - (height / 2) * Math.sin(angle);    // Needle tip y-coordinate
+            needle.setAttribute('x2', x2);
+            needle.setAttribute('y2', y2);
+            document.getElementById('fluctuation-value').textContent = fluctuation.toFixed(3); // Update display
+            document.getElementById('avg-palive').textContent = avgPAlive.toFixed(3);
+        }
+
+        // --- Perform One Simulation Step ---
+        function step() {
+            const newGrid = grid.map(row => row.map(cell => ({ ...cell }))); // Deep copy of grid
+            let totalChange = 0; // Track total state change
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const pCurrent = grid[i][j].b * grid[i][j].b; // Current probability
+                    const neighborsP = getNeighborsP(i, j); // Neighbor probabilities
+                    const pN2 = computePN(neighborsP, 2); // P(N=2)
+                    const pN3 = computePN(neighborsP, 3); // P(N=3)
+                    let pTarget;
+                    if (pCurrent > 0.5) {
+                        pTarget = pN2 + pN3; // Survival rule
+                    } else {
+                        pTarget = pN3; // Birth rule
+                    }
+                    const theta = (pTarget > pCurrent) ? DELTA : -DELTA; // Rotation direction
+                    newGrid[i][j] = applyRotation(grid[i][j], theta); // Update state
+                    totalChange += Math.abs((newGrid[i][j].b * newGrid[i][j].b) - pCurrent); // Accumulate change
+                    if (Math.random() < 0.01) { // 1% chance of random mutation
+                        const randomTheta = (Math.random() - 0.5) * 0.2; // Small random rotation
+                        newGrid[i][j] = applyRotation(newGrid[i][j], randomTheta);
+                    }
+                }
+            }
+            grid = newGrid; // Update grid
+            fluctuation = Math.min(totalChange / (ROWS * COLS), 1); // Normalize fluctuation
+            const avgPAlive = renderGrid(); // Render and get average pAlive
+            updateFluctuationMeter(fluctuation, avgPAlive); // Update UI
+        }
+
+        // --- Run Simulation Continuously ---
+        function runSimulation() {
+            if (running) {
+                step();
+                requestAnimationFrame(runSimulation); // Queue next frame
+            }
+        }
+
+        // --- Toggle Simulation Running ---
+        function toggleRun() {
+            const runBtn = document.getElementById('runBtn');
+            if (running) {
+                running = false;
+                runBtn.textContent = 'Start';
+            } else {
+                running = true;
+                runBtn.textContent = 'Stop';
+                requestAnimationFrame(runSimulation);
+            }
+        }
+
+        // --- Reset to Initial State ---
+        function reset() {
+            running = false;
+            document.getElementById('runBtn').textContent = 'Start';
+            initializeGrid();
+        }
+
+        // --- Randomize Grid States ---
+        function randomize() {
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    if (Math.random() < 0.5) {
+                        grid[i][j] = { a: 0, b: 1 }; // Randomly alive
+                    } else {
+                        grid[i][j] = { a: 1, b: 0 }; // Randomly dead
+                    }
+                }
+            }
+            const avgPAlive = renderGrid();
+            updateFluctuationMeter(0, avgPAlive); // Reset fluctuation to 0
+        }
+
+        // --- Toggle Fullscreen Mode ---
+        function toggleFullscreen() {
+            const elem = document.getElementById('simulation');
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().then(() => {
+                    document.getElementById('fullscreenBtn').textContent = 'Exit FS';
+                    const width = elem.clientWidth;
+                    const height = elem.clientHeight;
+                    renderer.setSize(width, height); // Resize renderer
+                    camera.aspect = width / height; // Update aspect ratio
+                    camera.updateProjectionMatrix();
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    document.getElementById('fullscreenBtn').textContent = 'Fullscreen';
+                    const simulationDiv = document.getElementById('simulation');
+                    renderer.setSize(simulationDiv.clientWidth, simulationDiv.clientHeight); // Restore size
+                    camera.aspect = simulationDiv.clientWidth / simulationDiv.clientHeight;
+                    camera.updateProjectionMatrix();
+                });
+            }
+        }
+
+        // --- Sync Fullscreen Button Text ---
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                document.getElementById('fullscreenBtn').textContent = 'Fullscreen';
+                const simulationDiv = document.getElementById('simulation');
+                renderer.setSize(simulationDiv.clientWidth, simulationDiv.clientHeight);
+                camera.aspect = simulationDiv.clientWidth / simulationDiv.clientHeight;
+                camera.updateProjectionMatrix();
+            }
+        });
+
+        // --- Start the Simulation ---
+        initThree(); // Set up 3D scene
+        initializeGrid(); // Initialize grid and render
+    </script>
+</body>
+</html>
