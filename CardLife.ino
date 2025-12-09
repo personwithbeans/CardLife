@@ -29,7 +29,7 @@ int runt = 0;
 int res = 1;
 int rcolor = random(0xFFFF);
 bool instantBoot = true;
-
+static const uint8_t G0 = 0
 
 //Number of generations
 #define NUMGEN 9999
@@ -82,8 +82,6 @@ void loop() {
   M5Cardputer.update();
   int GEN_DELAY = analogRead(G0) / 400;
   //Display a simple splash screen
-
-
 
   initGrid();
 
