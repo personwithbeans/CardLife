@@ -29,7 +29,6 @@ int runt = 0;
 int res = 1;
 int rcolor = random(0xFFFF);
 bool instantBoot = true;
-static const uint8_t G0 = 0
 
 //Number of generations
 #define NUMGEN 9999
@@ -80,8 +79,8 @@ double bat_p = 0.0;
 void loop() {
 
   M5Cardputer.update();
-  int GEN_DELAY = analogRead(G0) / 400;
-  //Display a simple splash screen
+  // int GEN_DELAY = analogRead(G0) / 400;
+    int GEN_DELAY = 20;
 
   initGrid();
 
@@ -104,7 +103,6 @@ void loop() {
         rcolor = random(0xFFFF);
         runt--;
         initGrid();
-        int GEN_DELAY = 20;
       }
       if (M5Cardputer.Keyboard.isKeyPressed('2')) {  //[CALLS SETRES FUNCTION TO CHANGE THE RESOLUTION]
         Serial.println("2 Pressed");
