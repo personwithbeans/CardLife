@@ -50,4 +50,4 @@ jobs:
       # Build firmware
       - name: Compile sketch
         run: |
-          arduino-cli compile --fqbn esp32:esp32:esp32 PrometheusOS.ino
+          arduino-cli compile --fqbn esp32:esp32:esp32 CardLife.ino
