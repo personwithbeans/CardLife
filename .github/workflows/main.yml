@@ -26,9 +26,7 @@ jobs:
       # Install libraries via Library Manager
       - name: Install Arduino Libraries
         run: |
-          arduino-cli lib install "M5Unified"
           arduino-cli lib install "M5Cardputer"
-          arduino-cli lib install "M5GFX"
       # Install M5Stack ESP32 Core (required for Cardputer)
       - name: Update index and add ESP32 core
         run: |
