@@ -73,7 +73,7 @@ Arduino settings:
 
 ## ▶️ Running the Simulation
 
-1. Upload the sketch to the M5 Cardputer or load via Flasher.
+1. Upload the sketch to the M5 Cardputer or load via Launcher.
 2. The grid initializes with a random distribution of alive/dead cells.
 3. Simulation runs until max generations reached or manually reset.
 
