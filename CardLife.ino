@@ -115,6 +115,9 @@ void loop() {
         Serial.println("4 Pressed (Set Max Generations Menu)");
         setMaxGen();
       }
+      if (M5Cardputer.Keyboard.isKeyPressed('h')) {
+        helpMenu();
+      }
     }
 
     M5Cardputer.Display.setTextColor(TFT_WHITE, BLACK);
@@ -347,15 +350,26 @@ void setMaxGen() {
 
 void helpMenu() {
   bool Active = true;
+  char *lines[] = { "1 - Nuke current run",
+                    "2 - Randomize Colour of alive pixels",
+                    "3 - Set Resolution size",
+                    "4 - Set Max Number of Generations",
+                    "Enter/Esc to exit any menus" };
+  int lineSpacing = 15;
+  int topMargin = 20;
+  int leftMargin = 10;
   M5Cardputer.Display.clear();
+  M5Cardputer.Display.setTextSize(1);
+  for (int i = 0; i < 5 ; i++) {
+    M5Cardputer.Display.drawString(lines[i], leftMargin, topMargin + (lineSpacing * i));
+  }
   while (Active) {
     M5Cardputer.update();
     if (M5Cardputer.Keyboard.isChange()) {
-      if (M5Cardputer.Keyboard.isKeyPressed('`') || M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER)) {  //Exits help menu on esc or enter button press
-        break;
+      if (M5Cardputer.Keyboard.isKeyPressed('`') || M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER)) {
+        Active = false;
       }
     }
   }
   M5Cardputer.Display.clear();  //Clears any text on exit of function
-
 }
