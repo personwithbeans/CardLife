@@ -27,6 +27,7 @@ int viewy = 135;
 #define TFT_ORANGE 0xFFA5
 int runt = 0;
 int res = 1;
+int mgen = 1;
 int rcolor = random(0xFFFF);
 bool instantBoot = true;
 
@@ -72,15 +73,13 @@ uint8_t grid[GRIDX][GRIDY];
 //The new grid for the next generation
 uint8_t newgrid[GRIDX][GRIDY];
 
-double vbat = 0.0;
-int discharge, charge;
-double temp = 0.0;
-double bat_p = 0.0;
+
+
 void loop() {
 
   M5Cardputer.update();
   // int GEN_DELAY = analogRead(G0) / 400;
-    int GEN_DELAY = 20;
+  int GEN_DELAY = 20;
 
   initGrid();
 
@@ -92,25 +91,31 @@ void loop() {
   for (int gen = 0; gen < gens; gen++) {
     M5Cardputer.update();
     if (M5Cardputer.Keyboard.isChange()) {
-      if (M5Cardputer.Keyboard.isKeyPressed('1')) {
-        Serial.println("1 Pressed");
+      if (M5Cardputer.Keyboard.isKeyPressed('1')) {  //Reset life
+        Serial.println("1 Pressed (NUKE)");
         gen = 0;
         M5Cardputer.Display.setTextSize(2);
         M5Cardputer.Display.setTextColor(TFT_WHITE, RED);
-        M5Cardputer.Display.setCursor(35, 27);
-        M5Cardputer.Display.println(F("  NUKE  "));
+        // M5Cardputer.Display.setCursor(35, 27);
+        M5Cardputer.Display.drawString("  NUKE  ", (M5.Display.width() / 2) - ((M5.Display.textWidth("  NUKE  ")) / 2), M5.Display.height() / 2);
         delay(200);
         rcolor = random(0xFFFF);
         runt--;
         initGrid();
       }
-      if (M5Cardputer.Keyboard.isKeyPressed('2')) {  //[CALLS SETRES FUNCTION TO CHANGE THE RESOLUTION]
-        Serial.println("2 Pressed");
+      if (M5Cardputer.Keyboard.isKeyPressed('2')) {  //Randomize Colours
+        Serial.println("2 Pressed (Chance Alive Random Colour)");
+        rcolor = random(0xFFFF);
+      }
+      if (M5Cardputer.Keyboard.isKeyPressed('3')) {  //Set Resolution Menu
+        Serial.println("3 Pressed (Set Resolution Menu)");
         setres();
-        M5Cardputer.Display.setRotation(1);
+      }
+      if (M5Cardputer.Keyboard.isKeyPressed('4')) {  //Set Max Generations Menu
+        Serial.println("4 Pressed (Set Max Generations Menu)");
+        setMaxGen();
       }
     }
-    vbat = 0;
 
     M5Cardputer.Display.setTextColor(TFT_WHITE, BLACK);
     M5Cardputer.Display.setCursor(200, 5);
@@ -208,41 +213,6 @@ int getNumberOfNeighbors(int x, int y) {
   return grid[x - 1][y] + grid[x - 1][y - 1] + grid[x][y - 1] + grid[x + 1][y - 1] + grid[x + 1][y] + grid[x + 1][y + 1] + grid[x][y + 1] + grid[x - 1][y + 1];
 }
 
-// void statusSys() { [NO CLUE WHAT THIS FUNCITON DOES (havn't looked at it), BUT NEVER GETS CALLED]
-//   M5Cardputer.update();
-//   M5Cardputer.Display.setRotation(1);
-//   extern const unsigned char gImage_002[];
-//   M5Cardputer.Display.setTextSize(2);
-//   M5Cardputer.Display.fillScreen(BLUE);
-//   M5Cardputer.Display.drawBitmap(0, 0, 135, 240, (uint16_t *)gImage_002);
-
-
-
-
-
-//   M5Cardputer.Display.setTextColor(BLACK, WHITE);
-//   if (M5Cardputer.Keyboard.isChange()) {
-//     if (M5Cardputer.Keyboard.isKeyPressed()) {
-//       Serial.println("3 Pressed");
-
-
-
-//       vbat = 0;
-//       temp = 0;
-//       bat_p = 0;
-//       M5Cardputer.Display.setRotation(1);
-//       M5Cardputer.Display.setCursor(0, 15, 1);
-//       M5Cardputer.Display.printf("batt:%.3fV\r\n", vbat);     //battery voltage
-//       M5Cardputer.Display.printf("temp:%.1fC\r\n", temp);     //axp192 inside temp
-//       M5Cardputer.Display.printf("power:%.3fmW\r\n", bat_p);  //battery power
-//       delay(500);
-//     }
-//   }
-//   delay(200);
-//   setres();
-// }
-
-
 // menu select resolution [NEEDS TO BE REBUILT TO MAINTIAN FUNCTION LOOP]
 void setres() {
   M5Cardputer.Display.clear();
@@ -251,53 +221,140 @@ void setres() {
     int prevRes = 0;
     M5Cardputer.update();
     if (prevRes != res) {  //Update Screen
-      M5Cardputer.Display.setCursor(5, 5);
+      // M5Cardputer.Display.setCursor(5, 5);
       M5Cardputer.Display.setTextColor(WHITE, BLACK);
-      M5Cardputer.Display.println(F(" CARD-LIFE  "));
-      M5Cardputer.Display.setCursor(5, 60);
-      M5Cardputer.Display.println(F(" set Res"));
-      M5Cardputer.Display.setCursor(120, 60);
-      M5Cardputer.Display.println(res);
+      M5Cardputer.Display.drawString(" CARD-LIFE  ", 5, 5);
+      // M5Cardputer.Display.setCursor(5, 60);
+      M5Cardputer.Display.drawString(" Set Res", 5, 25);
+      // M5Cardputer.Display.setCursor(120, 60);
+      M5Cardputer.Display.drawString("Option " + String(res) + ":", 5, 60);
+      // M5Cardputer.Display.setCursor(20, 90);
+      M5Cardputer.Display.drawString(String(viewx) + " x " + String(viewy), 20, 90);
+      // M5Cardputer.Display.setCursor(65, 90);
+      // M5Cardputer.Display.println("x");
+      // M5Cardputer.Display.setCursor(80, 90);
+      // M5Cardputer.Display.println(viewy);
       prevRes = res;
     }
 
     if (M5Cardputer.Keyboard.isChange()) {
-      if (M5Cardputer.Keyboard.isKeyPressed('`')) {
+      if (M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER) || M5Cardputer.Keyboard.isKeyPressed('`')) {
         Active = false;
       }
-      if (M5Cardputer.Keyboard.isKeyPressed('4')) {
-        Serial.println("4 Pressed");
+      if (M5Cardputer.Keyboard.isKeyPressed('/') || M5Cardputer.Keyboard.isKeyPressed(';')) {
+        Serial.println("Right Arrow Pressed");
         res++;
-        rcolor == random(0xFFFF);
+      }
+      if (M5Cardputer.Keyboard.isKeyPressed(',') || M5Cardputer.Keyboard.isKeyPressed('.')) {
+        Serial.println("Left Arrow Pressed");
+        res--;
       }
       if (res == 5) {
         res = 1;
+      }
+      if (res == 0) {
+        res = 4;
       }
       CELLXY == res;
       switch (res) {
         case 1:
           viewx = 240;
           viewy = 135;
-          gens = 3999;
+          // gens = 3999;
           break;
         case 2:
           viewx = 120;
           viewy = 67;
-          gens = 1999;
+          // gens = 1999;
           break;
         case 3:
           viewx = 40;
           viewy = 30;
-          gens = 800;
+          // gens = 800;
           break;
         case 4:
           viewx = 30;
           viewy = 20;
-          gens = 500;
+          // gens = 500;
           break;
       }
       delay(50);
     }
   }
+  M5Cardputer.Display.clear();  //Clears any text on exit of function
+}
+
+void setMaxGen() {
   M5Cardputer.Display.clear();
+  bool Active = true;
+  while (Active) {
+    int prevmgen = 0;
+    M5Cardputer.update();
+    if (prevmgen != mgen) {  //Update Screen
+      // M5Cardputer.Display.setCursor(5, 5);
+      M5Cardputer.Display.setTextColor(WHITE, BLACK);
+      M5Cardputer.Display.drawString(" CARD-LIFE  ", 5, 5);
+      // M5Cardputer.Display.setCursor(5, 60);
+      M5Cardputer.Display.drawString(" Set Max Gen", 5, 25);
+      // M5Cardputer.Display.setCursor(120, 60);
+      M5Cardputer.Display.drawString("Option " + String(mgen) + ":", 5, 60);
+      // M5Cardputer.Display.setCursor(20, 90);
+      M5Cardputer.Display.drawString(String(gens) + "     ", 20, 90);
+      // M5Cardputer.Display.setCursor(65, 90);
+      // M5Cardputer.Display.println("x");
+      // M5Cardputer.Display.setCursor(80, 90);
+      // M5Cardputer.Display.println(viewy);
+      prevmgen = mgen;
+    }
+
+    if (M5Cardputer.Keyboard.isChange()) {
+      if (M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER) || M5Cardputer.Keyboard.isKeyPressed('`')) {
+        Active = false;
+      }
+      if (M5Cardputer.Keyboard.isKeyPressed('/') || M5Cardputer.Keyboard.isKeyPressed(';')) {
+        Serial.println("Right Arrow Pressed");
+        mgen++;
+      }
+      if (M5Cardputer.Keyboard.isKeyPressed(',') || M5Cardputer.Keyboard.isKeyPressed('.')) {
+        Serial.println("Left Arrow Pressed");
+        mgen--;
+      }
+      if (mgen == 5) {
+        mgen = 1;
+      }
+      if (mgen == 0) {
+        mgen = 4;
+      }
+
+      switch (mgen) {
+        case 1:
+          gens = 3999;
+          break;
+        case 2:
+          gens = 1999;
+          break;
+        case 3:
+          gens = 800;
+          break;
+        case 4:
+          gens = 500;
+          break;
+      }
+    }
+  }
+  M5Cardputer.Display.clear();  //Clears any text on exit of function
+}
+
+void helpMenu() {
+  bool Active = true;
+  M5Cardputer.display.clear());
+  while (Active) {
+    M5Cardputer.update();
+    if (M5Cardputer.Keyboard.isChange()) {
+      if (M5Cardputer.Keyboard.isKeyPressed('`') || M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER)) {  //Exits help menu on esc or enter button press
+        break;
+      }
+    }
+  }
+  M5Cardputer.display.clear();  //Clears any text on exit of function
 }
