@@ -347,7 +347,7 @@ void setMaxGen() {
 
 void helpMenu() {
   bool Active = true;
-  M5Cardputer.Display.clear());
+  M5Cardputer.Display.clear();
   while (Active) {
     M5Cardputer.update();
     if (M5Cardputer.Keyboard.isChange()) {
@@ -357,4 +357,5 @@ void helpMenu() {
     }
   }
   M5Cardputer.Display.clear();  //Clears any text on exit of function
+
 }
