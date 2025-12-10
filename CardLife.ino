@@ -354,13 +354,14 @@ void helpMenu() {
                     "2 - Randomize Colour of alive pixels",
                     "3 - Set Resolution size",
                     "4 - Set Max Number of Generations",
-                    "Enter/Esc to exit any menus" };
+                    "Enter/Esc to exit any menus",
+                    "Original Project by: Mystereon(git)" };
   int lineSpacing = 15;
   int topMargin = 20;
   int leftMargin = 10;
   M5Cardputer.Display.clear();
   M5Cardputer.Display.setTextSize(1);
-  for (int i = 0; i < 5 ; i++) {
+  for (int i = 0; i < 6 ; i++) {
     M5Cardputer.Display.drawString(lines[i], leftMargin, topMargin + (lineSpacing * i));
   }
   while (Active) {
