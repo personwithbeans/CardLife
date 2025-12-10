@@ -29,7 +29,7 @@ int runt = 0;
 int res = 1;
 int mgen = 1;
 int rcolor = random(0xFFFF);
-bool instantBoot = true;
+bool instantBoot = false;//used to quickly get past splash screen during testing
 
 //Number of generations
 #define NUMGEN 9999
@@ -353,7 +353,7 @@ void helpMenu() {
   char *lines[] = { "1 - Nuke current run",
                     "2 - Randomize Colour of alive pixels",
                     "3 - Set Resolution size",
-                    "4 - Set Max Number of Generations",
+                    "4 - Set Max Number of Generations", 
                     "Enter/Esc to exit any menus",
                     "Original Project by: Mystereon(git)" };
   int lineSpacing = 15;
